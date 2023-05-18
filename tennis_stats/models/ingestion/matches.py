@@ -1,3 +1,9 @@
+"""
+Retrieves data for ATP matches
+for a given year range and loads
+it into the table <target>.matches
+"""
+
 import pandas as pd
 import httpx
 from io import StringIO
