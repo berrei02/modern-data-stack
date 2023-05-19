@@ -4,10 +4,16 @@ with stg_matches as (
          , date(tourney_date::varchar) as match_date
          , winner_id
          , winner_name
+         , coalesce(winner_rank_points, 0) as winner_rank_points
+         , winner_age
+         , winner_hand
+         , loser_id
+         , loser_name
+         , loser_age
+         , loser_hand
+         , coalesce(loser_rank_points, 0) as loser_rank_points
          , round as tournament_round
          , minutes as match_duration_minutes
-         , winner_rank_points
-         , loser_rank_points
       from {{ ref("matches") }}
 )
 select * 

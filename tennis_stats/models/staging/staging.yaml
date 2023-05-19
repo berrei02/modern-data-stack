@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: stg_matches
+    description: >
+      A cleaned dataset cleaning the ingested `matches` data.
+
+      Shows ATP match data incl. their winners and losers.
+
+    columns:
+      - name: tournament_id
+        description: id of the tournament
+      - name: tournament_name
+        description: name of the tournament
+      - name: match_date
+        description: date when the match was 
+      - name: winner_id
+        description: id of the winning tennis player
+      - name: winner_name
+        description: full name of the winning tennis player
+      - name: loser_id
+        description: id of the losing tennis player
+      - name: loser_name
+        description: full name of the losing tennis player
+      - name: tournament_round
+        description: indicates if quarter final, finale or similar
+      - name: match_duration_minutes
+        description: Duration of the match
+      - name: winner_rank_points
+        description: Winner's Rank Points
+      - name: loser_rank_points
+        description: Loser's Rank Points
+      - name: winner_age
+        description: Winner's Age
+      - name: loser_age
+        description: Loser's Age
+      - name: winner_hand
+        description: Winner's Primary Hand
+      - name: loser_hand
+        description: Loser's Primary Hand
+

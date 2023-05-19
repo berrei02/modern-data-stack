@@ -1,7 +1,0 @@
-[32m2023-05-18 20:30:30 +0200[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - 6563496f-540b-491c-ac14-aad0771ce911 - 82378 - LOGS_CAPTURED - Started capturing logs in process (pid: 82378).
-[32m2023-05-18 20:30:30 +0200[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - 6563496f-540b-491c-ac14-aad0771ce911 - 82378 - dbt__matches_raw - STEP_START - Started execution of step "dbt__matches_raw".
-[32m2023-05-18 20:30:31 +0200[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - 6563496f-540b-491c-ac14-aad0771ce911 - 82378 - dbt__matches_raw - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
-[32m2023-05-18 20:30:31 +0200[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - 6563496f-540b-491c-ac14-aad0771ce911 - dbt__matches_raw - Writing file at: /Users/stefanberreiter/Documents/programming/side_projects/modern-data-stack/orchestrator/tmp4_ylbaqu/storage/dbt/matches_raw
-[32m2023-05-18 20:30:31 +0200[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - 6563496f-540b-491c-ac14-aad0771ce911 - 82378 - dbt__matches_raw - ASSET_MATERIALIZATION - Materialized value dbt matches_raw.
-[32m2023-05-18 20:30:31 +0200[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - 6563496f-540b-491c-ac14-aad0771ce911 - 82378 - dbt__matches_raw - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
-[32m2023-05-18 20:30:31 +0200[0m - dagster - [34mDEBUG[0m - __ASSET_JOB - 6563496f-540b-491c-ac14-aad0771ce911 - 82378 - dbt__matches_raw - STEP_SUCCESS - Finished execution of step "dbt__matches_raw" in 1.06s.
