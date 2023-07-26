@@ -1,101 +1,152 @@
-# modern-data-stack
-A playground project where I aim to explore Modern Data Stack technologies.
+# Modern Data Stack (Open Source)
+A project where a realistic, lean data infrastructure is built with Open Source tooling aimed at self-hosting the Modern Data Stack.
 
-The Goal is to build a Data Project around the domain **worldclass ATP tennis statistics** whilst leveraging latest **Modern Data Stack** technologies.
+# Tech Stack
+* Data Sources:
+  * SaaS Product Database: Postgres (users, actions)
+  * Revenue/Ops Data: Google Sheets
+* Data Ingestion: Airbyte
+* Data Transformation: dbt and dbt-fal
+* Reporting / BI: Metabase
+* Data Science / Exploration: pandas (seaborn)
 
-## Get-started
 
 ### Project Structure
 
 ```
-├── orchestrator_dagster
-│   ├── ...  # currently just exploration
-├── tennis_stats
+├── airbyte
+│   ├── ... # incl. cloned Airbyte source code
+├── dbt
 │   ├── ...  # dbt project folders
 │   ├── dbt_project.yml  # storing key config of dbt project
-│   ├── Makefile  # handy functionality to easy terminal commands
+│   ├── Makefile  # handy functionality to easy terminal commands: TODO: Fix
 │   ├── profiles.yml  # storing key config of dbt project
 │   ├── requirements.txt  # dependencies for the dbt project
-├── docker-compose.yaml
+├── docker-compose.yaml  # spinning up dbs
 ├── README.md
 ```
 
-### Install Dependencies
+## Airbyte
+[Airbyte](https://airbyte.com/) is an open-source data integration engine that helps you consolidate your data in your data warehouses, lakes and databases. It's the open source alternative to Fivetran or Stitch.
+
+### Set-it up
 ```shell
-cd tennis_stats
-virtualenv venv
-source venv/bin/activate
-pip install requirements.txt
+git clone https://github.com/airbytehq/airbyte.git
+cd airbyte
+./run-ab-platform.sh
 ```
 
-### Spin-Up a Postgres Data Warehouse
-We are using a Postgres Warehouse (dockerized)
-which you can easily spin up using the following command.
-Having this up and running is obviously important to run any data logic.
+### Destination
 
-```shell
-cd modern_data_stack
-docker compose up
+For our use case, we set up a destination Data Warehouse where we will load the extracted data. We'll choose the Postgres Destination and need to provide usual db credentials. 
+
+![pic1](doc/airbyte/destinations.png "Destinations")
+
+### Sources
+We'll need to connect to another Postgres DB, our product database which powers our "hypothetical SaaS app". Often, further information for revenue or operations is located in Google Sheets, where we load pricing data.
+
+![pic2](doc/airbyte/sources.png "Sources")
+
+
+#### Speciality for setting-up Postgres
+To connect to another Postgres DB, that's a good scenario for using CDC (change data capture). We need to make some adjustments to our source database though to periodically stream changes to the destination DWH.
+
+In order to make CDC work, we need to create a user for airbite, change the WAL (write-ahead-log) settings as well as create a replication slot. See below commands:
+
+```sql
+/*
+Create Airbyte user to read data changes from product schema
+*/
+create user airbyte_product password 'airbyte_product';
+grant usage on schema product to airbyte_product;
+grant select on all tables in schema product to airbyte_product;
+alter default privileges in schema product grant select on tables to airbyte_product;
+alter user airbyte_product replication;
+
+/*
+Configure Postgres for logical replication
+*/
+alter system set wal_level = logical;
+alter system set max_wal_senders = 4;
+alter system set max_replication_slots = 5;
+show max_replication_slots; -- restart DB to refresh with new settings
+
+/*
+Create replication slot for publicating the product schema
+*/
+SELECT pg_create_logical_replication_slot('airbyte_slot', 'pgoutput');
+alter table product.users replica identity default;
+alter table product.subscriptions replica identity default;
+create publication airbyte_publication for all tables;
+select * from pg_replication_slots; -- cmd to validate the replication slot
 ```
 
-## Run DBT Pipeline
+### Connections
+![pic3](doc/airbyte/connections.png "Connections")
 
-### dbt DAG
-![dag](tennis_stats/images/dag.png "Dag")
+Connecting to a Google Sheet requires some adjustments in Google (out of scope for this write-up) for authentication. Other than that, connecting to the GSheet is quite straight forward.
 
-The Pipeline is leveraging **dbt** as well as the **dbt-fal** adaptor to leverage both dbt and python elt operations.
+For connecting to the Postgres Source DB, we require now the names for the publication and the replication slot on top of usual connection details (re-using the airbyte user from above). We end up with all tables in the schema `product` being syned to the Data Warehouse.
 
-Python is used to:
-- Ingest data from an Open Dataset from [web](https://github.com/JeffSackmann/tennis_atp): `matches` 
-- Run a Machine Learning algorithm (scikit-learn): `int_similar_matches`
+![pic3](doc/airbyte/cdc_sync.png "Multiple Tables are synced 1/hour")
 
-SQL is used to:
-- Build staging model: `stg_matches`
-- Build a metrics metadata model building on the Machine Learning model: `match_cluster_metadata`
+### End Result
 
-### Run Pipeline
-You can start the pipeline executing following commands in the terminal.
-
-```shell
-cd tennis_stats
-make run-pipe
-```
-
-
-### Clustering Output
-Tennis Matches are assumed to be similar along the dimensions of:
-- how far the 2 opponents differ in their age
-- how far the 2 opponents differ in their ranking
-
-Running a KMeans Clustering Algorithm returns 5 Game Clusters.
-
-![clustering_picture](tennis_stats/images/clustering.png "Clustering")
-
-The Clusters are done via the degree of similarity in age and ranks of the two players.
-
-This yields e.g. Clusters of Matches where a Youngster seems to have challenged an Oldie, but with quite close rankings (e.g. Cluster 5). 
-
-Or in Cluster 7, where two around equally old players with around equal rankings played against each other - in likely tough match on paper.
-
-
-| cluster\_name | age\_delta\_avg | rank\_delta\_avg | matches\_cnt |
-| :--- | :--- | :--- | :--- |
-| Cluster 0 | 8.415495867768604 | 708.030303030303 | 1452 |
-| Cluster 1 | 4.777364505844844 | 538.1987247608927 | 1882 |
-| Cluster 2 | 9.863535911602199 | 4142.008287292818 | 362 |
-| Cluster 3 | 2.6153225806451617 | 5378.279569892473 | 372 |
-| Cluster 4 | 6.431465517241378 | 8647.366379310344 | 232 |
-| Cluster 5 | 13.16321321321321 | 762.3213213213213 | 666 |
-| Cluster 6 | 2.9125820568927807 | 2366.5175054704596 | 914 |
-| Cluster 7 | 1.5203908241291424 | 521.429056924384 | 2354 |
-| No Prediction \(poor data\) | 6.877192982456136 | 855 | 125 |
+We end up with 3 tables periodically loaded to our database.
+- `product.users` storing user information (id, name)
+- `product.subscriptions` monthly subscriptions (start, end, type, paid, user_id)
+- `public.pricing` (GSheets) pricing information and when applicable
 
 
 ## Appendix
 
-You can run the dbt Documentation server giving a UI for the DAG via:
+If you want to reproduce the setting, you want to fill the Source DWH with the following
+data.
 
-```shell
-cd tennis_stats
-make serve-docs
+```sql
+/*
+ Data structures for Product DB.
+ Users table as well as subscriptions which
+ are monthly payments.
+ */
+
+create schema product;
+
+drop table if exists product.users;
+create table product.users (
+    user_id serial
+    , name varchar
+);
+
+insert into product.users (name)
+values ('John Doe'),
+       ('Jane Doe'),
+       ('Jonathan Foo');
+
+drop table if exists product.subscriptions;
+create table product.subscriptions (
+    id serial
+    , start_date date
+    , end_date date
+    , user_id int
+    , subscription varchar
+    , paid boolean
+);
+insert into product.subscriptions (start_date, end_date, user_id, subscription, paid)
+values
+       ('2023-01-01', '2023-01-31', 1, 'starter', true),
+       ('2023-02-01', '2023-02-28', 1, 'starter', true),
+       ('2023-03-01', '2023-03-31', 1, 'medium', true),
+       ('2023-04-01', '2023-04-30', 1, 'medium', true),
+       ('2023-05-01', '2023-05-31', 1, 'medium', true),
+       ('2023-01-01', '2023-01-31', 2, 'enterprise', true),
+       ('2023-02-01', '2023-02-28', 2, 'enterprise', true),
+       ('2023-03-01', '2023-03-31', 2, 'enterprise', true),
+       ('2023-04-01', '2023-04-30', 2, 'enterprise', true),
+       ('2023-05-01', '2023-05-31', 2, 'enterprise', false),
+       ('2023-01-01', '2023-01-31', 3, 'medium', true),
+       ('2023-02-01', '2023-02-28', 3, 'start', true),
+       ('2023-03-01', '2023-03-31', 3, 'start', true),
+       ('2023-04-01', '2023-04-30', 3, 'start', false),
+       ('2023-05-01', '2023-05-31', 3, 'start', false);
 ```
