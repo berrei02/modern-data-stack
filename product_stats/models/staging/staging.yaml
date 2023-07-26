@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: stg_users
+    description: Dataset including all users of SaaS application.
+    columns:
+      - name: user_id
+        description: unique id of the user
+          - unique
+      - name: user_name
+        description: first and last name of the user
+        tests:
+          - not_null
+  - name: stg_subscription_pricing
+    description: information on seat prices per subscription package
+

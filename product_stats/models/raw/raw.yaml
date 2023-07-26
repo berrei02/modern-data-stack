@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: product_data
+    database: postgres  
+    schema: product  
+    tables:
+      - name: users
+      - name: subscriptions
+        columns:
+          - name: subscription
+            tests:
+              - accepted_values: 
+                  values: ["starter", "medium", "enterprise"]
+
+  - name: revenue_data
+    database: postgres  
+    schema: public  
+    tables:
+      - name: pricing
+        columns:
+            - name: package
+              tests:
+                - accepted_values: 
+                    values: ["starter", "medium", "enterprise"]

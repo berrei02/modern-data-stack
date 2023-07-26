@@ -1,5 +1,5 @@
 # Modern Data Stack (Open Source)
-A project where a realistic, lean data infrastructure is built with Open Source tooling aimed at self-hosting the Modern Data Stack.
+A project where I build a lightweight data infrastructure with Open Source tooling aimed at self-hosting the Modern Data Stack.
 
 # Tech Stack
 * Data Sources:
@@ -12,17 +12,20 @@ A project where a realistic, lean data infrastructure is built with Open Source 
 
 
 ### Project Structure
-
 ```
 ├── airbyte
 │   ├── ... # incl. cloned Airbyte source code
+├── doc
+│   ├── ... # screenshots for documentation
 ├── dbt
 │   ├── ...  # dbt project folders
 │   ├── dbt_project.yml  # storing key config of dbt project
-│   ├── Makefile  # handy functionality to easy terminal commands: TODO: Fix
+│   ├── Makefile  # handy functionality to easy terminal commands
 │   ├── profiles.yml  # storing key config of dbt project
 │   ├── requirements.txt  # dependencies for the dbt project
 ├── docker-compose.yaml  # spinning up dbs
+├── storage
+│   ├── docker-compose.yaml  # spinning up Postgres Source DB and DWH
 ├── README.md
 ```
 
@@ -97,6 +100,24 @@ We end up with 3 tables periodically loaded to our database.
 - `product.subscriptions` monthly subscriptions (start, end, type, paid, user_id)
 - `public.pricing` (GSheets) pricing information and when applicable
 
+## Transformations with DBT and DBT-Fal
+[dbt](https://www.getdbt.com/) is an intuitive, collaborative platform that lets you reliably transform data using SQL and Python code.
+
+Using multi-layered transformations, we:
+- integrate and test raw sources from the previous three data-sets
+- create staging models (prefixed with `stg`)
+- bring data together in a data mart (e.g. `users` view which includes revenue data while leveraging all 3 datasources)
+
+Below you can see the dbt documentation and the auto-generate DAG for this little project.
+
+![pic9](doc/dbt/dag.png "Dag")
+
+
+How to get started
+```shell
+dbt run
+dbt build  # for running tests as well
+```
 
 ## Appendix
 
@@ -145,8 +166,8 @@ values
        ('2023-04-01', '2023-04-30', 2, 'enterprise', true),
        ('2023-05-01', '2023-05-31', 2, 'enterprise', false),
        ('2023-01-01', '2023-01-31', 3, 'medium', true),
-       ('2023-02-01', '2023-02-28', 3, 'start', true),
-       ('2023-03-01', '2023-03-31', 3, 'start', true),
-       ('2023-04-01', '2023-04-30', 3, 'start', false),
-       ('2023-05-01', '2023-05-31', 3, 'start', false);
+       ('2023-02-01', '2023-02-28', 3, 'starter', true),
+       ('2023-03-01', '2023-03-31', 3, 'starter', true),
+       ('2023-04-01', '2023-04-30', 3, 'starter', false),
+       ('2023-05-01', '2023-05-31', 3, 'starter', false);
 ```

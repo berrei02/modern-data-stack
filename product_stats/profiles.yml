@@ -1,0 +1,28 @@
+product_stats:
+  outputs:
+    
+    dev_with_fal:
+      type: fal
+      db_profile: dev # This points to your main adapter
+
+    dev:
+      type: postgres
+      threads: 1
+      host: localhost
+      port: 5499
+      user: postgres
+      pass: postgres
+      dbname: postgres
+      schema: dbt
+
+    prod:
+      type: postgres
+      threads: [1 or more]
+      host: [host]
+      port: [port]
+      user: [prod_username]
+      pass: [prod_password]
+      dbname: [dbname]
+      schema: [prod_schema]
+
+  target: dev_with_fal
