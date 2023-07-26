@@ -1,7 +1,10 @@
 # Modern Data Stack (Open Source)
 A project where I build a lightweight data infrastructure with Open Source tooling aimed at self-hosting the Modern Data Stack.
 
-# Tech Stack
+
+![pic1](doc/overview.png "Overview")
+
+# Stack
 * Data Sources:
   * SaaS Product Database: Postgres (users, actions)
   * Revenue/Ops Data: Google Sheets
@@ -118,6 +121,27 @@ How to get started
 dbt run
 dbt build  # for running tests as well
 ```
+
+## Metabase
+[Metabase](https://www.metabase.com/) is for business intelligence and offers a wide range of dashboards, and data visualization tools. It allows you to dig deeper into your data with open source, no SQL tools for data visualization. This is a perfect fit for making data available in the whole company.
+
+To connect to the dockerized postgres instance, we need to provide a special host name `host.docker.internal` as well as the usual connection details. We only allow access to `dbt` schema to not confuse the audience.
+
+![pic9](doc/metabase/connection_to_dwh.png "DWH")
+
+Inviting users allows to add employees to join the platform and create analytics on their own.
+![pic9](doc/metabase/invite_users.png "Invite Users")
+
+Playing around with the data from the DWH, the users can answer their own questions with the help of Metabase. Such a dashboard could be like the one below which uses the previously prepared data via dbt.
+![pic9](doc/metabase/dashboard.png "Dashboard")
+
+## Data Science / Data Analysis
+
+Data Scientist would likely connect with pandas read_sql easily to the DWH using a sqlalchemy engine.
+A quick script is available in a Jupyter notebook in the data_science folder - below you can find an easy visualization with the seaborn library.
+
+![Alt text](doc/data_science/seaborn.png)
+
 
 ## Appendix
 
