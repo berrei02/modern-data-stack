@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  dwh: # DB serving as DWH
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dwh #fix it
+    ports:
+      - '5499:5432'
+    volumes:
+      - dwh:/var/lib/postgresql/data
+  
+  sourcedb: # DB serving as Product DB
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=product
+    ports:
+      - '5498:5432'
+    volumes:
+      - sourcedb:/var/lib/postgresql/data
+volumes:
+  dwh:
+    driver: local
+  sourcedb:
+    driver: local
