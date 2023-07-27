@@ -1,9 +1,3 @@
-Todo:
-- [ ] DBT Fal
-- [ ] Sinnvolle summary
-- [ ] Icons von Docker noch hinzufügen
-- [ ] Verargumentieren, warum kein Airflow
-
 # Modern Data Stack (Open Source)
 A project where I build a lightweight data infrastructure with Open Source tooling aimed at self-hosting the Modern Data Stack. It aims at giving a broad overview of tooling while keeping complexity small for the reader's purpose.
 
@@ -143,7 +137,7 @@ dbt build
 
 In the end we end up with a view called `users` to be consumed in the reporting / downstream data science layer.
 
-```mermaid
+```
 users:
   - user_id
   - user_name
