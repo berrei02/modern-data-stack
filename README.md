@@ -1,6 +1,11 @@
-# Modern Data Stack (Open Source)
-A project where I build a lightweight data infrastructure with Open Source tooling aimed at self-hosting the Modern Data Stack.
+Todo:
+- [ ] DBT Fal
+- [ ] Sinnvolle summary
+- [ ] Icons von Docker noch hinzufügen
+- [ ] Verargumentieren, warum kein Airflow
 
+# Modern Data Stack (Open Source)
+A project where I build a lightweight data infrastructure with Open Source tooling aimed at self-hosting the Modern Data Stack. It aims at giving a broad overview of tooling while keeping complexity small for the reader's purpose.
 
 ![pic1](doc/overview.png "Overview")
 
@@ -18,15 +23,19 @@ A project where I build a lightweight data infrastructure with Open Source tooli
 ```
 ├── airbyte
 │   ├── ... # incl. cloned Airbyte source code
+├── data_science
+│   ├── ... # collection of jupyter notebooks
+│   ├── local_env.py  # gitignored, env vars for building connection to DWH
 ├── doc
 │   ├── ... # screenshots for documentation
-├── dbt
+├── metabase
+│   ├── Makefile  # handy commands to set-up and run Metabase
+├── product_stats
 │   ├── ...  # dbt project folders
 │   ├── dbt_project.yml  # storing key config of dbt project
-│   ├── Makefile  # handy functionality to easy terminal commands
+│   ├── Makefile  # handy functionality for easy terminal commands
 │   ├── profiles.yml  # storing key config of dbt project
 │   ├── requirements.txt  # dependencies for the dbt project
-├── docker-compose.yaml  # spinning up dbs
 ├── storage
 │   ├── docker-compose.yaml  # spinning up Postgres Source DB and DWH
 ├── README.md
@@ -104,11 +113,22 @@ We end up with 3 tables periodically loaded to our database.
 - `public.pricing` (GSheets) pricing information and when applicable
 
 ## Transformations with DBT and DBT-Fal
+
 [dbt](https://www.getdbt.com/) is an intuitive, collaborative platform that lets you reliably transform data using SQL and Python code.
 
+### Install Dependencies
+```shell
+cd product_stats
+virtualenv venv
+source venv/bin/activate
+pip install requirements.txt
+```
+
+### DBT-Project
 Using multi-layered transformations, we:
 - integrate and test raw sources from the previous three data-sets
-- create staging models (prefixed with `stg`)
+- create staging models (prefixed with `stg_`)
+- create intermediate models (e.g. prefixed with `int_`, use case: e.g. ML based predictions which you later want to reuse)
 - bring data together in a data mart (e.g. `users` view which includes revenue data while leveraging all 3 datasources)
 
 Below you can see the dbt documentation and the auto-generate DAG for this little project.
@@ -116,10 +136,21 @@ Below you can see the dbt documentation and the auto-generate DAG for this littl
 ![pic9](doc/dbt/dag.png "Dag")
 
 
-How to get started
+How to build the dbt DAG (execute sql and python transformations):
 ```shell
-dbt run
-dbt build  # for running tests as well
+dbt build
+```
+
+In the end we end up with a view called `users` to be consumed in the reporting / downstream data science layer.
+
+```mermaid
+users:
+  - user_id
+  - user_name
+  - predicted_user_category
+  - subscription_months_cnt
+  - unpaid_subscriptions_cnt
+  - lifetime_revenue
 ```
 
 ## Metabase
