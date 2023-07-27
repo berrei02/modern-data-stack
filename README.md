@@ -147,6 +147,8 @@ users:
   - lifetime_revenue
 ```
 
+Usually you would now schedule the DAG to run periodically (likely with `dbt run` instead of `dbt build` to excl. tests). You may achieve this as simple as possible with a cron job or you'd include it in your orchestrator of choice such as Airflow or Dagster (likely an overkill for this project).
+
 ## Metabase
 [Metabase](https://www.metabase.com/) is for business intelligence and offers a wide range of dashboards, and data visualization tools. It allows you to dig deeper into your data with open source, no SQL tools for data visualization. This is a perfect fit for making data available in the whole company.
 
